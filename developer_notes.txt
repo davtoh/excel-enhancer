@@ -1,0 +1,72 @@
+# TO INSTALL
+https://docs.xlwings.org/en/stable/addin.html
+
+# steps
+
+# install addin
+# bear in mind that The add-in is password protected with the password 'xlwings'
+xlwings addin install
+
+# to use RunPython or UDFs in a workbook, you need to set a reference to xlwings in the VBA editor
+Tools > References...
+
+# if you want to create a project that already has everython ser use:
+xlwings quickstart
+
+# in the case where no addin wants to be installed
+xlwings quickstart myproject --standalone
+
+# TO USE UDF
+https://docs.xlwings.org/en/stable/udfs.html
+
+# FEATURES
+rich-common table opperation functions
+utility functions
+useful examples per UDF
+extendable
+core function helpers to use in extensions
+supports selection of entire columns in formulas (fitting actual table contents) e.g. A:A
+intelillent chaching per formula block which reduces processing times recursively
+Automatic test generation
+Unittest helpers
+tests per UDF
+integrated debugger
+
+# Errores comunes:
+Object Required; Se requiere un objeto; https://stackoverflow.com/a/49384532/5288758
+No command specified in the configuration, cannot autostart server; Press "Restart UDF Server" then "Import Functions"
+
+# available main functions
+xf_del_watcher
+xf_delete_library
+xf_evaluate
+xf_fit_table
+xf_get_caller_address
+xf_get_selection_range
+xf_load_library
+xf_make_array
+xf_permutations
+xf_recalculate_udfs
+xf_set_watcher
+xf_test_data
+
+
+xl_combinations
+xl_concat
+xl_expand_down
+xl_expand_right
+xl_expand_table
+xl_filter_by
+xl_find_similar
+xl_group_by
+xl_rename
+xl_select_by
+xl_sort_by
+
+xv_find_similar
+xv_index
+xv_normalize_accents (ejemplos, tests)
+
+xlv_map_by (ejemplos, tests)
+xlv_apply_expr (ejemplos, tests)
+xlv_apply_str

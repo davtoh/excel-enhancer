@@ -1,3 +1,13 @@
+# Temporary and backup Excel files
+* - copia*.xlsm
+* - copia*.xlsx
+* - Copy*.xlsm
+* - Copy*.xlsx
+~$*.xlsm
+~$*.xlsx
+~$*.docx
+*.tmp
+
 # Python
 __pycache__/
 *.py[cod]
@@ -24,6 +34,11 @@ wheels/
 .installed.cfg
 *.egg
 
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Logs
 *.log
 
@@ -33,8 +48,6 @@ wheels/
 *.swp
 *.swo
 
-# OS & Temp
+# OS
 .DS_Store
 Thumbs.db
-~$*.xlsx
-~$*.docx

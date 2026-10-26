@@ -25,7 +25,7 @@ def find_version(*file_paths):
 version = find_version('excel_enhancer.py')
 here = os.path.abspath(os.path.dirname(__file__))
 
-long_description = read(os.path.join(here, 'README.rst'))
+long_description = read(os.path.join(here, 'README.md'))
 
 setup(
     name="excel-enhancer",
@@ -38,7 +38,7 @@ setup(
     py_modules=["excel_enhancer", "core", "mod_udf"],
     license="BSD-3-Clause",
     long_description=long_description,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
     python_requires=">=3.9",
     classifiers=[
         'Development Status :: 4 - Beta',

@@ -1,15 +1,13 @@
-# Include the license file
-include LICENSE.txt README.rst
+# Include license and documentation
+include LICENSE.txt README.md developer_notes.txt
 
-# Include the examples files
-recursive-include examples *.py
+# Include examples and master workbooks
+include examples.xlsm
+include excel_enhancer.xlsm
+recursive-include examples *.xlsm
 
-# Include the tests files
-recursive-exclude tests * # exclude all test data for better control
-#recursive-include tests *.py # only scripts
-#recursive-include tests *.py im*.jpg # scripts and test images
-#recursive-include tests *.py im1*.jpg # scripts and only some test images
+# Include extensions
+recursive-include extensions *.py
 
-# If using Python 2.6 or less, then have to include package data, even though
-# it's already declared in setup.py
-# include sample/*.dat
+# Include tests
+recursive-include tests *.py

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "excel-enhancer"
 version = "0.2.0"
 description = "Enhance Excel with Python User Defined Functions (UDFs) and pandas"
-readme = "README.rst"
+readme = "README.md"
 license = { text = "BSD-3-Clause" }
 authors = [
     { name = "David Toro", email = "davsamirtor@gmail.com" }

@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "excel-enhancer"
+version = "0.2.0"
+description = "Enhance Excel with Python User Defined Functions (UDFs) and pandas"
+readme = "README.rst"
+license = { text = "BSD-3-Clause" }
+authors = [
+    { name = "David Toro", email = "davsamirtor@gmail.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "xlwings>=0.30.0",
+    "scipy>=1.10.0",
+    "pywin32>=300; platform_system == 'Windows'",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "faker>=18.0.0",
+]
+extensions = [
+    "faker>=18.0.0",
+]
+
+[project.scripts]
+excel-enhancer = "excel_enhancer:serve"
+
+[project.urls]
+Homepage = "https://github.com/davtoh/excel-enhancer"
+Documentation = "https://excel-enhancer.readthedocs.io"
+
+[tool.setuptools]
+py-modules = ["excel_enhancer", "core", "mod_udf"]
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

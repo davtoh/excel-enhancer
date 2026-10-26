@@ -1,27 +1,11 @@
-# setup.py
-#
-# Direct install (all systems):
-#   "python setup.py install"
-#
-# For Python 3.x use the corresponding Python executable,
-# e.g. "python3 setup.py ..."
-#
-#
 import sys
 import io
 import os
 import re
-
-try:
-    from setuptools import setup, find_packages
-except ImportError:
-    from distutils.core import setup, find_packages
+from setuptools import setup, find_packages
 
 
 def read(*names, **kwargs):
-    """Python 2 and Python 3 compatible text file reading.
-    Required for single-sourcing the version string.
-    """
     with io.open(
         os.path.join(os.path.dirname(__file__), *names),
         encoding=kwargs.get("encoding", "utf8")
@@ -30,11 +14,6 @@ def read(*names, **kwargs):
 
 
 def find_version(*file_paths):
-    """
-    Search the file for a version string.
-    file_path contain string path components.
-    Reads the supplied Python module as text without importing it.
-    """
     version_file = read(*file_paths)
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
                               version_file, re.M)
@@ -42,68 +21,59 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-# information of package
-print(sys.version) # version of python
 
-package = 'base_project'
-version = find_version(package, '__init__.py')
-print("Package '{}' is in version {}".format(package,version)) # package version
-
-# exclude here folders with .py files except the desired package
-packages = find_packages(exclude=['tests*'])
-print("Packages to include {}".format(packages)) # package includes
-
+version = find_version('excel_enhancer.py')
 here = os.path.abspath(os.path.dirname(__file__))
 
-# Get the long description from the README file
 long_description = read(os.path.join(here, 'README.rst'))
 
 setup(
-    name="base_project",
-    description="Base project",
+    name="excel-enhancer",
+    description="Enhance Excel with Python User Defined Functions (UDFs) and pandas",
     version=version,
     author="David Toro",
     author_email="davsamirtor@gmail.com",
-    url="https://github.com/davtoh/base_project",
-    packages=packages,
-    license="BSD",
+    url="https://github.com/davtoh/excel-enhancer",
+    packages=find_packages(exclude=['tests*']),
+    py_modules=["excel_enhancer", "core", "mod_udf"],
+    license="BSD-3-Clause",
     long_description=long_description,
-    # see complete list https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    long_description_content_type="text/x-rst",
+    python_requires=">=3.9",
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Intended Audience :: Education',
+        'Intended Audience :: Financial and Insurance Industry',
         'Intended Audience :: Science/Research',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Operating System :: POSIX :: Linux',
         'Operating System :: Microsoft :: Windows',
-        #'Operating System :: MacOS :: MacOS X',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Topic :: Education',
-        'Topic :: Scientific/Engineering :: Artificial Intelligence',
-        'Topic :: Software Development :: Libraries',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
+        'Topic :: Office/Business :: Financial :: Spreadsheet',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    keywords='development, images, restoration',
-    platforms='any',
+    keywords='excel, udfs, xlwings, pandas, data-analysis',
+    platforms=['win32', 'win_amd64'],
     install_requires=[
-        'future>=0.16',
-        'appdirs>=1.4',
-        'packaging>=16.8',
-                      ],
-    scripts=['imrestore.py'],
+        'numpy>=1.24.0',
+        'pandas>=2.0.0',
+        'xlwings>=0.30.0',
+        'scipy>=1.10.0',
+        'pywin32>=300; platform_system=="Windows"',
+    ],
+    extras_require={
+        'dev': ['pytest>=8.0.0', 'faker>=18.0.0'],
+        'extensions': ['faker>=18.0.0'],
+    },
     entry_points={
         'console_scripts': [
-            'imrestore = RRtools.imrestore:shell',
+            'excel-enhancer = excel_enhancer:serve',
         ],
     }
 )

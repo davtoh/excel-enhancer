@@ -1,6 +1,8 @@
 """
 main functions for any excel_enhancer application
 """
+__version__ = "0.2.0"
+
 import sys
 import os
 import time
@@ -23,13 +25,25 @@ import importlib.util
 import pickle
 
 import xlwings as xw
+try:
+    from xlwings import xlplatform
+except ImportError:
+    try:
+        from xlwings import _xlwindows as xlplatform
+    except ImportError:
+        try:
+            from xlwings import _xlmac as xlplatform
+        except ImportError:
+            xlplatform = None
+if not hasattr(xw, 'xlplatform'):
+    xw.xlplatform = xlplatform
+
 from xlwings.udfs import udf_modules
 
 from xlwings.conversion.standard import (BaseAccessor, ValueAccessor, ReadValueFromRangeStage, Ensure2DStage,
                                          CleanDataFromReadStage, TransposeStage, AdjustDimensionsStage,
                                          Pipeline, WriteValueToRangeStage, CleanDataForWriteStage)
 
-#from xlwings import conversion, xlplatform, Range, apps
 from xlwings.conversion import Converter, PandasDataFrameConverter
 
 
@@ -340,6 +354,8 @@ class MyConverter(Converter):
 
 def pandas_dataframe_converter(value, *args, **kwargs):
     """ pandas converter from xlwings for particular conversions when needed"""
+    if isinstance(value, pd.DataFrame):
+        return value
     if args and not kwargs:
         kwargs = args[0]
     elif args:
@@ -727,7 +743,7 @@ def {case_name}(self):
         if kwargs:
             lines_kwarg_serializations = []
             names_kwarg = []
-            for i, (key, value) in enumerate(kwargs.itemps()):
+            for i, (key, value) in enumerate(kwargs.items()):
                 ser_val = self.serialize(value)
                 line = f"{i1}{key} = {ser_val}"
                 names_kwarg.append(key)

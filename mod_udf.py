@@ -10,13 +10,32 @@ from importlib import reload  # requires >= py 3.4
 from win32com.client import Dispatch, CDispatch
 import pywintypes
 
-from . import conversion, xlplatform, Range, apps, Book, PRO
-from .utils import VBAWriter
+import win32api
+
+from xlwings import conversion, Range, apps, Book
+try:
+    from xlwings import xlplatform
+except ImportError:
+    try:
+        from xlwings import _xlwindows as xlplatform
+    except ImportError:
+        try:
+            from xlwings import _xlmac as xlplatform
+        except ImportError:
+            xlplatform = None
+try:
+    from xlwings import PRO
+except (ImportError, AttributeError):
+    PRO = False
+from xlwings.utils import VBAWriter
 import pandas as pd
 import warnings
 
 if PRO:
-    from .pro.embedded_code import dump_embedded_code, get_udf_temp_dir
+    try:
+        from xlwings.pro.embedded_code import dump_embedded_code, get_udf_temp_dir
+    except Exception:
+        PRO = False
 
 # save equations results according to inputs. This maps cache_key to result using get_cache_key
 # TODO use a memoized cache to be shared bewteen sessions so that work is not lost
@@ -513,21 +532,25 @@ def call_udf(module_name, func_name, args, this_workbook=None, caller=None):
         if current_size != result_size:  # this should be done at the end of the execution of the equation as resizing can throw error if it keeps resizing at every nested equation evaluation. Only print to excel at the end
             # Only write to excel if this is last result
             if is_last_function and last_func_count <= 1:
-                from .server import add_idle_task
+                try:
+                    from xlwings.server import add_idle_task
+                except Exception:
+                    add_idle_task = None
                 print(
                     F"executed with resize at iteration {last_func_count} in function '{func_name}' result of {eq_key}")
-                if len(this_equation) > 255:  # SOLUTION 2
-                    add_idle_task(DelayedResizeDynamicArrayFormula(
-                        Range(impl=xlplatform.Range(xl=caller)).resize(*(1, 1)),
-                        caller,
-                        True
-                    ))
-                else:
-                    add_idle_task(DelayedResizeDynamicArrayFormula(
-                        Range(impl=xlplatform.Range(xl=caller)).resize(*result_size),
-                        caller,
-                        current_size[0] > result_size[0] or current_size[1] > result_size[1]
-                    ))
+                if add_idle_task is not None:
+                    if len(this_equation) > 255:  # SOLUTION 2
+                        add_idle_task(DelayedResizeDynamicArrayFormula(
+                            Range(impl=xlplatform.Range(xl=caller)).resize(*(1, 1)),
+                            caller,
+                            True
+                        ))
+                    else:
+                        add_idle_task(DelayedResizeDynamicArrayFormula(
+                            Range(impl=xlplatform.Range(xl=caller)).resize(*result_size),
+                            caller,
+                            current_size[0] > result_size[0] or current_size[1] > result_size[1]
+                        ))
             else:
                 print(
                     f"needs clearing! but ignored. iteration {last_func_count} in function '{func_name}' result of {eq_key}")

@@ -41,8 +41,9 @@ import re
 import warnings
 from difflib import SequenceMatcher
 import itertools
-#from xlwings.udfs import import_udfs
 from core import *
+
+__version__ = "0.2.0"
 
 # TODO improve documentation and add the STANDARD and FRAMEWORK for all the custom UDF functions
 # TODO in "udfs.py" implement the memoized or in memory-persistent dictionary for runs to be consistent between sessions
@@ -168,19 +169,24 @@ def build_group_df(selected, operation, c1, c2, c3):
     :param c3: name of column resulting from operation
     :return: dataframe
     """
-    Ad, Bd, Cd = [], [], []
-    for i, j, k in [([i] * len(j), j, [k] * len(j)) for (i, j), k in zip(selected, operation.values.tolist())]:
-        Ad += i
-        Bd += list(j)
-        Cd += k
-    if not isinstance(c1, (list, tuple)):
-        arrays = [Ad, Bd]
-        index = pd.MultiIndex.from_arrays(arrays, names=[c1]+c2)
-    else:
-        arrays = list(zip(*zip(*zip(*Ad), Bd)))
-        names = [i[0] for i in zip(*zip(*zip(*[c1]), c2))]
-        index = pd.MultiIndex.from_arrays(arrays, names=names)
-    return pd.DataFrame({c3: Cd}, index=index)
+    group_cols = [c1] if isinstance(c1, str) else list(c1)
+    sel_cols = [c2] if isinstance(c2, str) else list(c2)
+    col_names = [c3] if isinstance(c3, str) else list(c3)
+
+    rows = []
+    op_values = operation.values.tolist()
+    for (group_key, group_data), op_val in zip(selected, op_values):
+        k = list(group_key) if isinstance(group_key, tuple) else [group_key]
+        if not isinstance(op_val, list):
+            op_val = [op_val]
+        if isinstance(group_data, pd.Series):
+            for val in group_data:
+                rows.append(k + [val] + op_val)
+        else:
+            for _, r in group_data.iterrows():
+                rows.append(k + r.tolist() + op_val)
+    cols = group_cols + sel_cols + col_names
+    return pd.DataFrame(rows, columns=cols)
 
 
 custom_group_by = {}  # group for xl_group_by
@@ -252,13 +258,20 @@ def xl_group_by(df, groups, selection=None, operation="sum", mode="1", params=No
                              F"Got {len(selection)} selections and {len(operations)} operations with {operations}")
 
     # normalize params
-    if not isinstance(params, list):
-        parameters = [params]*len(selection)  # match number of selections
+    if params is None:
+        parameters = [[]] * len(selection)
+    elif not isinstance(params, list):
+        parameters = [[params]] * len(selection)
     else:
-        parameters = params
-        if len(parameters) < len(selection):
+        if len(params) == len(selection) and all(isinstance(p, (list, tuple)) for p in params):
+            parameters = params
+        elif len(params) == len(selection):
+            parameters = [[p] for p in params]
+        elif len(selection) == 1:
+            parameters = [params]
+        else:
             raise ValueError(F"params must match number of selections. "
-                         F"Got {len(selection)} selections and {len(parameters)} operations with {parameters}")
+                             F"Got {len(selection)} selections and {len(params)} params with {params}")
 
     # group on groups
     grouped = df.groupby(groups)
@@ -276,7 +289,10 @@ def xl_group_by(df, groups, selection=None, operation="sum", mode="1", params=No
         ops = {}
         for new_col_name, col, operation, param in zip(col_operations, selection, operations, parameters):
             selected = x[col]
-            param = param or []
+            if param is None:
+                param = []
+            elif not isinstance(param, (list, tuple)):
+                param = [param]
             try:
                 # get custom fucntion
                 custom_op = custom_group_by[operation]
@@ -297,16 +313,16 @@ def xl_group_by(df, groups, selection=None, operation="sum", mode="1", params=No
 
     # show group selection with operations
     if debugger.active:
-        db = [build_group_df(selected, op, groups, selection, col_operations)]
+        try:
+            db = [build_group_df(selected, op, groups, selection, col_operations)]
+        except Exception:
+            db = [op]
     else:
         db = []
 
     if mode == 1:
-        if len(groups) > 1:
-            arrays = [list(i) + j for i, j in zip([i[0] for i in grouped[groups]], op.values.tolist())]
-        else:
-            # in case i is to subscriptable
-            arrays = [list(i) + j for i, j in zip([[i[0]] for i in grouped[groups]], op.values.tolist())]
+        group_keys = [list(k) if isinstance(k, tuple) else [k] for k in [i[0] for i in grouped[groups]]]
+        arrays = [k + j for k, j in zip(group_keys, op.values.tolist())]
         names = groups + col_operations
         return pd.DataFrame(arrays, columns=names), db
     elif mode == 2:
@@ -362,7 +378,7 @@ def xl_filter_by(df, column, include, exclude=None, mode=0, ignore_case=None, ig
         flags = [flags]
 
     for f in flags:
-        _flags &= getattr(re.RegexFlag, f)
+        _flags |= getattr(re.RegexFlag, f)
 
     # check mode
     modes = ["exact", "startswith", "endswith", "contains", "match"]  # values
@@ -842,7 +858,7 @@ def similar_std_instance(a, b):
     :param b:
     :return:
     """
-    s = SequenceMatcher(None, a.lower(), b.lower())
+    s = SequenceMatcher(None, str(a).lower(), str(b).lower())
     ratio = s.ratio()
     op_codes = s.get_opcodes()
     return ratio, op_codes
@@ -966,7 +982,8 @@ def xv_find_similar(value, vector, min_rate=0.8, num=1, mode="value"):
         if to_replace_as_nan:
             row_expansion = []
             for j, value in enumerate(row):
-                if modes[j] in nanable_modes:
+                actual_mode = modes[_modes[j]]
+                if actual_mode in nanable_modes:
                     row_expansion.append(Special.nan)
                 else:
                     row_expansion.append(value)
@@ -1184,17 +1201,18 @@ def xl_find_similar(values, matrix, min_rate=0.8, num=1, mode="value", header=Fa
         # expand sub-columns to main columns
         row_expansion = []
         for j, (expand, value) in enumerate(zip(expansions, row)):
+            actual_mode = modes[_modes[j]]
             if expand:
                 # more than 1 column, must be expanded
                 if len(value) != expand:
-                    raise ValueError("Expansion '{value}' does not correspond to values {value} in row {i}")
-                if to_replace_as_nan and modes[j] in nanable_modes:
+                    raise ValueError(F"Expansion '{value}' does not correspond to values {value} in row {i}")
+                if to_replace_as_nan and actual_mode in nanable_modes:
                     row_expansion.extend([Special.nan]*expand)
                 else:
                     row_expansion.extend(value)
             else:
                 # single column
-                if to_replace_as_nan and modes[j] in nanable_modes:
+                if to_replace_as_nan and actual_mode in nanable_modes:
                     row_expansion.append(Special.nan)
                 else:
                     row_expansion.append(value)

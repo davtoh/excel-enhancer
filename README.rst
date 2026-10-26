@@ -29,8 +29,13 @@ Installation :
 Quickstart :
 ------------
 
-Demo code:
-'''''''''''''
+Run directly from the command line:
+
+.. code:: bash
+
+    excel-enhancer
+
+Or in Python:
 
 .. code:: python
 

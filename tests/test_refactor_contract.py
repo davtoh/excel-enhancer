@@ -54,6 +54,16 @@ class TestCodebaseContractInvariants(unittest.TestCase):
         for attr in enhancer.udf.__all__:
             self.assertTrue(hasattr(mod_udf, attr), f"Missing symbol {attr} in mod_udf.py facade")
 
+    def test_excel_enhancer_facade_parity(self):
+        """Verify excel_enhancer.py re-exports all domain functions and server exports."""
+        import excel_enhancer
+        import enhancer.functions
+        import enhancer.server
+        for attr in enhancer.functions.__all__:
+            self.assertTrue(hasattr(excel_enhancer, attr), f"Missing symbol {attr} in excel_enhancer.py facade")
+        for attr in enhancer.server.__all__:
+            self.assertTrue(hasattr(excel_enhancer, attr), f"Missing symbol {attr} in excel_enhancer.py facade")
+
     def test_udf_decorator_behavior(self):
         """Verify @xlfunc decorator correctly annotates functions."""
         from enhancer.udf import xlfunc

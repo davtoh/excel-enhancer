@@ -103,10 +103,67 @@ All extracted modules and the facade strictly satisfy quantitative modularity bu
 
 ---
 
-## Milestone 3: Function Catalog & Domain Decomposition (excel_enhancer.py) (Pending)
-- **Phase Status**: Active / Next (Campaign Phase 3 of 4)
+## Milestone 3: Function Catalog & Domain Decomposition (excel_enhancer.py) (Completed)
+- **Date**: 2026-11-03
+- **Phase Status**: Completed (Campaign Phase 3 of 4)
 - **Objectives & Scope**:
-  - Decompose `excel_enhancer.py` (1,481 lines) into domain submodules under `enhancer/functions/` and `enhancer/server/`.
-  - Refactor oversized functions (`xl_find_similar`, `xl_filter_by`, `xl_group_by`).
-  - Wire `excel_enhancer.py` as a backward-compatible re-export facade.
+  - Decompose root monolithic `excel_enhancer.py` (1,481 lines) into focused domain submodules under `enhancer/functions/` and `enhancer/server/`.
+  - Refactor oversized functions (`xl_find_similar`, `xl_filter_by`, `xl_group_by`, `xv_find_similar`, `xv_index`, `xl_select_by`) into cohesive helpers $\le 40$ lines.
+  - Convert `excel_enhancer.py` into a thin, 100% backward-compatible re-export facade (105 lines).
+  - Guarantee zero regressions across test suites, AST contracts, and VBA macro interfaces.
+
+### Files Modified & Created
+- **Created**:
+  - `enhancer/server/__init__.py` (7 lines): Barrel re-export for server execution runtime.
+  - `enhancer/server/runner.py` (32 lines): Server loop (`serve`) and workbook UDF module loader (`load_udf_modules`).
+  - `enhancer/functions/__init__.py` (112 lines): Barrel re-export for all domain UDF functions.
+  - `enhancer/functions/array_ops.py` (69 lines): Table and selection expansion functions (`xl_expand_down`, `xl_expand_right`, `xl_expand_table`, `xf_fit_table`, `xl_concat`).
+  - `enhancer/functions/vector_ops.py` (133 lines): Vector and headless range operations (`xv_concat_h`, `xv_concat_v`, `xv_index`, `xv_normalize_accents`, `xv_normalize_to_string`).
+  - `enhancer/functions/combinatorics.py` (54 lines): Permutations and combinatorial generators (`xl_combinations`, `xf_permutations`).
+  - `enhancer/functions/utilities.py` (177 lines): Testing, formula display, expression evaluation, and dynamic library loading (`xf_test_data`, `xf_print_unittest`, `xf_delete_unittest`, `xf_collect_unittest`, `xf_show_formula`, `xf_evaluate`, `xf_make_array`, `xf_get_selection_range`, `xf_get_caller_address`, `xf_recalculate_udfs`, `xf_load_library`, `xf_delete_library`).
+  - `enhancer/functions/expressions.py` (190 lines): Expression evaluation and string formatting (`xlv_map_by`, `xl_format_by`, `xlv_apply_expr`, `xlv_apply_str`).
+  - `enhancer/functions/table_ops.py` (346 lines): DataFrame grouping, filtering, sorting, selecting, and renaming (`xl_group_by`, `xl_filter_by`, `xl_sort_by`, `xl_select_by`, `xl_rename`, `build_group_df`, `operation_resume`).
+  - `enhancer/functions/similarity.py` (290 lines): Fuzzy similarity matching and validation metrics (`similar_std_instance`, `mean_validation`, `rmse_validation`, `xv_find_similar`, `xl_find_similar`).
+- **Modified**:
+  - `excel_enhancer.py`: Decomposed from 1,481 lines down to 105 lines as a thin re-export facade.
+  - `tests/test_refactor_contract.py`: Added `test_excel_enhancer_facade_parity` regression contract smoke test.
+
+### Verification & Test Commands
+```bash
+# Run unit test suite (including contract smoke tests)
+python -m unittest discover tests
+
+# Pytest execution
+pytest tests/ -v
+
+# Contract parity verification
+python -m unittest tests/test_refactor_contract.py
+```
+
+### Modularity Audit Summary
+All extracted modules and the facade strictly satisfy quantitative modularity budgets:
+| Module | Line Count | Status |
+| :--- | :--- | :--- |
+| `enhancer/server/__init__.py` | 7 lines | **OK** ($\le 350$L) |
+| `enhancer/server/runner.py` | 32 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/combinatorics.py` | 54 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/array_ops.py` | 69 lines | **OK** ($\le 350$L) |
+| `excel_enhancer.py` (facade) | 105 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/__init__.py` | 112 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/vector_ops.py` | 133 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/utilities.py` | 177 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/expressions.py` | 190 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/similarity.py` | 290 lines | **OK** ($\le 350$L) |
+| `enhancer/functions/table_ops.py` | 346 lines | **OK** ($\le 350$L) |
+
+**Verification Result**: 54/54 tests passing. 0 regressions. 0 contract discrepancies. Critical breaches: 0. Warnings: 0.
+
+---
+
+## Milestone 4: Packaging, Oversized Test Refactoring & Verification Hardening (Pending)
+- **Phase Status**: Pending (Campaign Phase 4 of 4)
+- **Objectives & Scope**:
+  - Refactor `tests/test_xv_normalize_accents.py` (438 lines) into modular, cohesive test methods $\le 350$ lines.
+  - Audit and modernize packaging (`setup.py` / `pyproject.toml`) to ensure `enhancer` and all subpackages are declared and packaged properly.
+  - Final full-workspace verification and migration sign-off.
 

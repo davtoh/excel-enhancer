@@ -40,5 +40,38 @@ class TestCodebaseContractInvariants(unittest.TestCase):
         count = len(re.findall(r'!important\b', css_text, re.IGNORECASE))
         self.assertLessEqual(count, 0, f"!important count increased to {count}!")
 
+    def test_core_facade_parity(self):
+        """Verify core.py re-exports all public symbols from enhancer.core."""
+        import core
+        import enhancer.core
+        for attr in enhancer.core.__all__:
+            self.assertTrue(hasattr(core, attr), f"Missing symbol {attr} in core.py facade")
+
+    def test_mod_udf_facade_parity(self):
+        """Verify mod_udf.py re-exports all public symbols from enhancer.udf."""
+        import mod_udf
+        import enhancer.udf
+        for attr in enhancer.udf.__all__:
+            self.assertTrue(hasattr(mod_udf, attr), f"Missing symbol {attr} in mod_udf.py facade")
+
+    def test_udf_decorator_behavior(self):
+        """Verify @xlfunc decorator correctly annotates functions."""
+        from enhancer.udf import xlfunc
+
+        @xlfunc(category="Math", volatile=True)
+        def sample_add(a, b=10):
+            """Sample addition doc."""
+            return a + b
+
+        self.assertTrue(hasattr(sample_add, "__xlfunc__"))
+        meta = sample_add.__xlfunc__
+        self.assertEqual(meta["name"], "sample_add")
+        self.assertEqual(meta["category"], "Math")
+        self.assertTrue(meta["volatile"])
+        self.assertFalse(meta["sub"])
+        self.assertEqual(len(meta["args"]), 2)
+        self.assertEqual(meta["args"][0]["name"], "a")
+        self.assertEqual(meta["args"][1]["optional"], 10)
+
 if __name__ == "__main__":
     unittest.main()

@@ -54,10 +54,59 @@ All extracted modules and the facade strictly satisfy quantitative modularity bu
 
 ---
 
-## Milestone 2: UDF Dispatch & Engine Decomposition (mod_udf.py) (Pending)
-- **Phase Status**: Active / Next (Campaign Phase 2 of 4)
+## Milestone 2: UDF Dispatch & Engine Decomposition (mod_udf.py) (Completed)
+- **Date**: 2026-11-03
+- **Phase Status**: Completed (Campaign Phase 2 of 4)
 - **Objectives & Scope**:
-  - Decompose `mod_udf.py` (742 lines) into `enhancer/udf/` domain package (`decorators.py`, `cache.py`, `async_worker.py`, `dispatcher.py`, `vba_generator.py`).
-  - Refactor the 196-line `call_udf` function into single-responsibility handlers.
-  - Wire `mod_udf.py` as a backward-compatible re-export facade.
+  - Decompose `mod_udf.py` (742 lines) into `enhancer/udf/` domain package (`decorators.py`, `cache.py`, `async_worker.py`, `module_registry.py`, `dispatcher.py`, `vba_generator.py`).
+  - Refactor the 196-line `call_udf` function into single-responsibility handlers $\le 40$ lines.
+  - Refactor the 99-line `generate_vba_wrapper` and 69-line `import_udfs` into focused functions $\le 40$ lines.
+  - Convert `mod_udf.py` into a thin, 100% backward-compatible re-export facade (69 lines).
+  - Guarantee zero regressions across test suites and existing callers.
+
+### Files Modified & Created
+- **Created**:
+  - `enhancer/udf/__init__.py` (82 lines): Package re-export barrel for all UDF engine symbols.
+  - `enhancer/udf/decorators.py` (180 lines): `xlfunc`, `xlsub`, `xlret`, `xlarg`, and signature introspection.
+  - `enhancer/udf/cache.py` (117 lines): Result caching, formula tracking, and cell reference counting.
+  - `enhancer/udf/async_worker.py` (121 lines): `AsyncThread`, dynamic array checking, and `DelayedResizeDynamicArrayFormula`.
+  - `enhancer/udf/module_registry.py` (85 lines): Dynamic module loader, embedded code handling, and reload tracker.
+  - `enhancer/udf/dispatcher.py` (210 lines): `call_udf` dispatch engine broken into single-responsibility handlers.
+  - `enhancer/udf/vba_generator.py` (205 lines): `generate_vba_wrapper` and `import_udfs` VBA macro generation and registration.
+- **Modified**:
+  - `mod_udf.py`: Decomposed from 742 lines down to 69 lines as a thin re-export facade.
+  - `tests/test_refactor_contract.py`: Added regression smoke tests for `mod_udf` facade parity and decorator behavior.
+
+### Verification & Test Commands
+```bash
+# Run unit test suite (including contract smoke tests)
+python -m unittest discover tests
+
+# Modularity budget and line count audit
+python -m unittest tests/test_refactor_contract.py
+```
+
+### Modularity Audit Summary
+All extracted modules and the facade strictly satisfy quantitative modularity budgets:
+| Module | Line Count | Status |
+| :--- | :--- | :--- |
+| `mod_udf.py` (facade) | 69 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/__init__.py` | 82 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/module_registry.py` | 85 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/cache.py` | 117 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/async_worker.py` | 121 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/decorators.py` | 180 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/vba_generator.py` | 205 lines | **OK** ($\le 350$L) |
+| `enhancer/udf/dispatcher.py` | 210 lines | **OK** ($\le 350$L) |
+
+**Verification Result**: 53/53 tests passing. 0 regressions. 0 contract discrepancies.
+
+---
+
+## Milestone 3: Function Catalog & Domain Decomposition (excel_enhancer.py) (Pending)
+- **Phase Status**: Active / Next (Campaign Phase 3 of 4)
+- **Objectives & Scope**:
+  - Decompose `excel_enhancer.py` (1,481 lines) into domain submodules under `enhancer/functions/` and `enhancer/server/`.
+  - Refactor oversized functions (`xl_find_similar`, `xl_filter_by`, `xl_group_by`).
+  - Wire `excel_enhancer.py` as a backward-compatible re-export facade.
 

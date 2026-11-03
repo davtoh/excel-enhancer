@@ -160,10 +160,50 @@ All extracted modules and the facade strictly satisfy quantitative modularity bu
 
 ---
 
-## Milestone 4: Packaging, Oversized Test Refactoring & Verification Hardening (Pending)
-- **Phase Status**: Pending (Campaign Phase 4 of 4)
+## Milestone 4: Packaging, Oversized Test Refactoring & Verification Hardening (Completed)
+- **Date**: 2026-11-03
+- **Phase Status**: Completed (Campaign Phase 4 of 4)
 - **Objectives & Scope**:
   - Refactor `tests/test_xv_normalize_accents.py` (438 lines) into modular, cohesive test methods $\le 350$ lines.
-  - Audit and modernize packaging (`setup.py` / `pyproject.toml`) to ensure `enhancer` and all subpackages are declared and packaged properly.
-  - Final full-workspace verification and migration sign-off.
+  - Audit and modernize packaging (`setup.py`, `pyproject.toml`, `MANIFEST.in`) to ensure `enhancer` and all domain subpackages are properly declared and packaged.
+  - Add regression contract smoke test for package version consistency (`0.2.0`).
+  - Final full-workspace verification and migration sign-off across all 47 project files.
+
+### Files Modified & Created
+- **Modified**:
+  - `tests/test_xv_normalize_accents.py`: Decomposed from 438 lines down to 134 lines (class 28L, 7 methods) by eliminating triple-redundant data fixtures while preserving exact behavioral coverage.
+  - `tests/test_refactor_contract.py`: Added `test_package_version_consistency` verifying alignment between root and package `__version__`.
+  - `pyproject.toml`: Configured `packages.find` with `where = ["."]`, `include = ["enhancer*"]`, and `exclude = ["tests*"]`.
+  - `MANIFEST.in`: Added `recursive-include enhancer *.py`.
+  - `README.md`: Updated badge and test counts to 55 tests passing, documented test runners, and added Architecture & Modularity diagram.
+
+### Verification & Test Commands
+```bash
+# Run unit test suite (including contract smoke tests)
+python -m unittest discover tests
+
+# Pytest execution
+pytest tests/ -v
+
+# Strict modularity audit across whole repository
+python "<skill_dir>/scripts/code_health_audit.py" --path . --by-dir --strict
+
+# Contract parity verification
+python "<skill_dir>/scripts/contract_snapshot.py" verify --path . --strict
+```
+
+### Full Modularity Audit Summary (Post-Phase 4)
+All 47 files across the entire repository strictly comply with quantitative modularity budgets:
+| Directory / Subsystem | Files | Total Lines | Status |
+| :--- | :--- | :--- | :--- |
+| `.` (facades & configs) | 4 | 319L | **OK** (All within budget) |
+| `enhancer` | 1 | 6L | **OK** (All within budget) |
+| `enhancer/core` | 10 | 1,596L | **OK** (All within budget) |
+| `enhancer/functions` | 8 | 1,377L | **OK** (All within budget) |
+| `enhancer/server` | 2 | 41L | **OK** (All within budget) |
+| `enhancer/udf` | 7 | 992L | **OK** (All within budget) |
+| `extensions` | 4 | 186L | **OK** (All within budget) |
+| `tests` | 11 | 844L | **OK** (All within budget) |
+
+**Verification Result**: 55/55 tests passing (0 failures, 0 errors). 0 contract regressions. Critical breaches: 0. Warnings: 0. Campaign 100% complete.
 

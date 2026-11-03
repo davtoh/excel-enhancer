@@ -83,5 +83,11 @@ class TestCodebaseContractInvariants(unittest.TestCase):
         self.assertEqual(meta["args"][0]["name"], "a")
         self.assertEqual(meta["args"][1]["optional"], 10)
 
+    def test_package_version_consistency(self):
+        """Verify package version consistency between root and enhancer."""
+        import excel_enhancer
+        import enhancer
+        self.assertEqual(excel_enhancer.__version__, enhancer.__version__)
+
 if __name__ == "__main__":
     unittest.main()

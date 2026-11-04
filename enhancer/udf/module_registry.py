@@ -7,6 +7,7 @@ and manages hot reloading when module files change on disk.
 
 import os
 import os.path
+import sys
 from importlib import import_module, reload
 from types import ModuleType
 from typing import Any
@@ -16,13 +17,18 @@ from xlwings import Book
 try:
     from xlwings import xlplatform
 except ImportError:
+
+if sys.platform == "win32":
     try:
         from xlwings import _xlwindows as xlplatform
     except ImportError:
         try:
             from xlwings import _xlmac as xlplatform
+            from xlwings import xlplatform
         except ImportError:
             xlplatform = None
+else:
+    xlplatform = None
 
 try:
     from xlwings import PRO

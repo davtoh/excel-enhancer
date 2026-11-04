@@ -6,20 +6,22 @@ either synchronously or via background threads, handles result caching,
 and coordinates dynamic array delayed resizing in Excel.
 """
 
+import sys
 from typing import Any, Callable
 
 from win32com.client import Dispatch
 from xlwings import conversion, Range
-try:
-    from xlwings import xlplatform
-except ImportError:
+
+if sys.platform == "win32":
     try:
         from xlwings import _xlwindows as xlplatform
     except ImportError:
         try:
-            from xlwings import _xlmac as xlplatform
+            from xlwings import xlplatform
         except ImportError:
             xlplatform = None
+else:
+    xlplatform = None
 
 try:
     from xlwings.server import OutputParameter

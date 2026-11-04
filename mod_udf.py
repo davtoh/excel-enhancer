@@ -15,17 +15,19 @@ import pywintypes
 import win32api
 import pandas as pd
 from xlwings import conversion, Range, apps, Book
+import sys
 from xlwings.utils import VBAWriter
-try:
-    from xlwings import xlplatform
-except ImportError:
+
+if sys.platform == "win32":
     try:
         from xlwings import _xlwindows as xlplatform
     except ImportError:
         try:
-            from xlwings import _xlmac as xlplatform
+            from xlwings import xlplatform
         except ImportError:
             xlplatform = None
+else:
+    xlplatform = None
 
 try:
     from xlwings import PRO

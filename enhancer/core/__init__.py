@@ -2,18 +2,20 @@
 Excel Enhancer core subsystem: accessors, converters, macros, debugging, and test generation.
 """
 
+import sys
 import xlwings as xw
 
-try:
-    from xlwings import xlplatform
-except ImportError:
+if sys.platform == "win32":
     try:
         from xlwings import _xlwindows as xlplatform
     except ImportError:
         try:
-            from xlwings import _xlmac as xlplatform
+            from xlwings import xlplatform
         except ImportError:
             xlplatform = None
+else:
+    xlplatform = None
+
 if not hasattr(xw, 'xlplatform'):
     xw.xlplatform = xlplatform
 

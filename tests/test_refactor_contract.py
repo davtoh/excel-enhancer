@@ -89,5 +89,38 @@ class TestCodebaseContractInvariants(unittest.TestCase):
         import enhancer
         self.assertEqual(excel_enhancer.__version__, enhancer.__version__)
 
+    def test_xlplatform_resolution_windows_contract(self):
+        """Verify xlplatform binds to _xlwindows with valid Range(xl=...) signature on Windows."""
+        import sys
+        import inspect
+        from enhancer.udf import dispatcher
+
+        if sys.platform == "win32":
+            self.assertIsNotNone(dispatcher.xlplatform)
+            sig = inspect.signature(dispatcher.xlplatform.Range.__init__)
+            self.assertIn("xl", sig.parameters, "Windows Range.__init__ must accept 'xl' parameter")
+
+    def test_dispatcher_convert_input_args(self):
+        """Verify _convert_input_args converts missing arguments and primitives correctly."""
+        from enhancer.udf.dispatcher import _convert_input_args
+
+        def dummy_func(x, y=42):
+            return x + y
+
+        args_info = [
+            {"name": "x", "options": {}},
+            {"name": "y", "options": {}, "optional": 42},
+        ]
+        # Missing argument sentinel (-2147352572) should be replaced with default
+        raw_args = ("hello", -2147352572)
+        converted = _convert_input_args(raw_args, args_info, dummy_func, None)
+        self.assertEqual(converted, ["hello", 42])
+
+    def test_no_xlmac_imports_in_codebase(self):
+        """Verify obsolete _xlmac imports are not present in active source files."""
+        for py_path in self.root.glob("enhancer/**/*.py"):
+            content = py_path.read_text(encoding="utf-8")
+            self.assertNotIn("_xlmac", content, f"Obsolete _xlmac reference found in {py_path.name}")
+
 if __name__ == "__main__":
     unittest.main()

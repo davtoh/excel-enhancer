@@ -98,7 +98,7 @@ class ValueAccessorFitted(ValueAccessor):
         return (
             BaseAccessor.reader(options)
             .append_stage(ConverterAdjustInfiniteRange())
-            .append_stage(ReadValueFromRangeStage())
+            .append_stage(ReadValueFromRangeStage(options))
             .append_stage(Ensure2DStage())
             .append_stage(CleanDataFromReadStage(options))
             .append_stage(TransposeStage(), only_if=options.get('transpose', False))

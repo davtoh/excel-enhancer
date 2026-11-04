@@ -6,20 +6,22 @@ iteration counters to avoid premature recalculations.
 """
 
 import re
+import sys
 from typing import Any, Callable
 
 import pandas as pd
 from xlwings import Range
-try:
-    from xlwings import xlplatform
-except ImportError:
+
+if sys.platform == "win32":
     try:
         from xlwings import _xlwindows as xlplatform
     except ImportError:
         try:
-            from xlwings import _xlmac as xlplatform
+            from xlwings import xlplatform
         except ImportError:
             xlplatform = None
+else:
+    xlplatform = None
 
 # save equations results according to inputs. This maps cache_key to result using get_cache_key
 # TODO use a memoized cache to be shared bewteen sessions so that work is not lost

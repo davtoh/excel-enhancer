@@ -57,6 +57,8 @@ Documentation = "https://excel-enhancer.readthedocs.io"
 py-modules = ["excel_enhancer", "core", "mod_udf"]
 
 [tool.setuptools.packages.find]
+where = ["."]
+include = ["enhancer*"]
 exclude = ["tests*"]
 
 [tool.pytest.ini_options]

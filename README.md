@@ -4,7 +4,7 @@
 [![xlwings](https://img.shields.io/badge/xlwings-%3E%3D0.30-orange.svg)](https://www.xlwings.org/)
 [![pandas](https://img.shields.io/badge/pandas-%3E%3D2.0-150458.svg)](https://pandas.pydata.org/)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE.txt)
-[![Tests](https://img.shields.io/badge/tests-47%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-55%20passed-brightgreen.svg)]()
 
 **Excel Enhancer** bridges the gap between traditional spreadsheet modeling and high-performance Python data manipulation. Powered by [xlwings](https://www.xlwings.org/) and [pandas](https://pandas.pydata.org/), it exposes expressive User Defined Functions (UDFs) directly inside Excel cells, enabling complex table transforms, fuzzy matching, vector algebra, string templating, and formula step debugging without writing cumbersome VBA macros.
 
@@ -181,11 +181,33 @@ The repository provides ready-to-run workbooks demonstrating functions in action
   2. Click **Restart UDF Server**, then click **Import Functions**.
 
 #### Q: How do I run the test suite?
-Run `pytest` from the root of the repository:
+Run `pytest` or `unittest` from the root of the repository:
 ```bash
 pytest -v
+# or using unittest:
+python -m unittest discover tests
 ```
-All 47 unit tests cover DataFrame transformations, converters, error handlers, and extension modules.
+All 55 unit and contract smoke tests cover DataFrame transformations, converters, error handlers, facade parity, and extension modules.
+
+---
+
+## 🏗️ Architecture & Modularity
+
+Excel Enhancer is structured around domain modules under `enhancer/` while providing 100% backward-compatible root facades for existing scripts, tests, and Excel workbooks:
+
+```text
+excel_enhancer/
+├── core.py                          # Re-export facade -> enhancer.core
+├── excel_enhancer.py                # Re-export facade -> enhancer.functions, enhancer.server
+├── mod_udf.py                       # Re-export facade -> enhancer.udf
+├── enhancer/                        # Modular domain package
+│   ├── core/                        # Converters, text utils, debugger, test generator
+│   ├── functions/                   # Table, vector, expression, similarity & array ops
+│   ├── server/                      # Server loop and runtime runner
+│   └── udf/                         # Decorators, dispatcher, cache & VBA generation
+├── extensions/                      # Extensible drop-in modules
+└── tests/                           # Complete test suite (55 tests)
+```
 
 ---
 
